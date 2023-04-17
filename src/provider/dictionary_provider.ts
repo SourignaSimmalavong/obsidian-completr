@@ -40,14 +40,18 @@ export abstract class DictionaryProvider implements SuggestionProvider {
         if (!list || list.length < 1)
             return [];
 
-        //TODO: Rank those who match case higher
+        // Queries like vscode smart completion:
+        // any word with `query` characters in the right order (even if not adjacent) will match
+        let fullq = new RegExp(query.replace(/.{1}/g, "$&"+"\\w*"));
+
         const result: Suggestion[] = [];
         for (let el of list) {
             filterMapIntoArray(result, el, s => {
                     let match = maybeLowerCase(s, ignoreCase);
                     if (ignoreDiacritics)
                         match = removeDiacritics(match);
-                    return match.startsWith(query);
+                    // return match.startsWith(query);
+                    return (fullq).test(match);
                 },
                 settings.wordInsertionMode === WordInsertionMode.IGNORE_CASE_APPEND ?
                     //In append mode we combine the query with the suggestions
